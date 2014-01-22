@@ -1,10 +1,11 @@
 import serial, time, random
 import numpy as np
 
-arduino = serial.Serial('/dev/ttyUSB0', 57600)
+arduino = serial.Serial('/dev/ttyUSB0', 14400)
 
 x = np.linspace(-10,10,60)
 c = -10.
+inc = 0.5
 
 while True:
     print c
@@ -19,7 +20,9 @@ while True:
             arduino.write(chr(0)) # r
             arduino.write(chr(0))   # g
             arduino.write(chr(int(y[i]*255)))   # b
-    c = c + 1
+    c += inc
     if c>10.:
-        c = -10.
+        inc = -0.5
+    elif c<-10.:
+        inc = 0.5
     time.sleep(0.1)

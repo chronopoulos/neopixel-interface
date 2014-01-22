@@ -1,6 +1,6 @@
 import serial
 
-arduino = serial.Serial('/dev/ttyUSB0', 57600)
+arduino = serial.Serial('/dev/ttyUSB0', 14400)
 
 for i in range(60):
     arduino.write(chr(0))       # r

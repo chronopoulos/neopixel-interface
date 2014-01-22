@@ -5,7 +5,7 @@
  */
 
 #include <Adafruit_NeoPixel.h>
-#include "WS2812_Definitions.h"
+//#include "WS2812_Definitions.h"
 
 #define LED_COUNT 60
 #define DATA_PIN 4
@@ -21,7 +21,7 @@ byte bbuff[LED_COUNT];
 
 void setup()
 {
-  Serial.begin(57600);
+  Serial.begin(14400);
   leds.begin();  // Call this to start up the LED strip.
   /*for (i=0;i<LED_COUNT;i++)
   {
