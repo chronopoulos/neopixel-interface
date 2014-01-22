@@ -10,7 +10,7 @@ from txosc import dispatch
 from txosc import async
 import serial
 
-arduino = serial.Serial('/dev/tty.usbserial-FTF3MN94', 14400)
+arduino = serial.Serial('/dev/ttyUSB1', 14400)
 
 class UDPReceiverApplication(object):
     """
@@ -68,13 +68,15 @@ class UDPReceiverApplication(object):
         """
         Fallback for any unhandled message
         """
-        print("Fallback:")
+        # print("Fallback:")
         # print dir(message)
-        print message.address
+        # print message.address
         print("  Got %s from %s" % (message, address))
+        print message.getValues()
         arduino.write(chr(254)) # start
         for x in message.getValues():
-            arduino.write(chr(x))
+            print x
+            arduino.write(chr(int(x*250)))
         arduino.write(chr(255)) # stop
 
     # def ping_handler(self, message, address):
