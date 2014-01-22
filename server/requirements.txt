@@ -1,0 +1,2 @@
+txosc == 0.2.0
+pyserial == 2.7
