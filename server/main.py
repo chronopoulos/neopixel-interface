@@ -10,7 +10,7 @@ from txosc import dispatch
 from txosc import async
 import serial
 
-arduino = serial.Serial('/dev/ttyUSB1', 14400)
+arduino = serial.Serial('/dev/ttyACM1', 9600)
 
 class UDPReceiverApplication(object):
     """
