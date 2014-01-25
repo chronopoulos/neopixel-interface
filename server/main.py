@@ -63,11 +63,8 @@ class UDPReceiverApplication(object):
 
     def quit_handler(self, message, address):
         """
-        Method handler for /quit
         Quits the application.
         """
-        print("quit_handler")
-        print("  Got %s from %s" % (message, address))
         reactor.stop()
         print("Goodbye.")
 
