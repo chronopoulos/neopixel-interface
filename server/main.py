@@ -1,9 +1,4 @@
 #!/usr/bin/env python
-"""
-Example of a UDP txosc receiver with Twisted.
-
-This example is in the public domain.
-"""
 from twisted.internet import reactor
 from txosc import osc
 from txosc import dispatch
@@ -12,12 +7,9 @@ import serial
 import re
 
 arduino = serial.Serial('/dev/tty.usbmodem1411', baudrate=9600)
-
 # /dev/tty.usbserial-FTF3MN94
+
 class UDPReceiverApplication(object):
-    """
-    Example that receives UDP OSC messages.
-    """
     def __init__(self, port):
         self.port = port
         self.receiver = dispatch.Receiver()
