@@ -99,5 +99,5 @@ def get_number(message):
 modes = [None, 'u', 'r', 'f']
 
 if __name__ == "__main__":
-    app = UDPReceiverApplication(17779)
+    app = UDPReceiverApplication(8000)
     reactor.run()
