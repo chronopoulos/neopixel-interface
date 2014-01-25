@@ -26,15 +26,15 @@ class UDPReceiverApplication(object):
 
         # Simple
         self.receiver.addCallback("/1/fader1", self.hue_handler)
-        self.receiver.addCallback("/1/fader2", self.sat_handler)
-        self.receiver.addCallback("/1/fader3", self.val_handler)
+        self.receiver.addCallback("/1/fader2", self.saturation_handler)
+        self.receiver.addCallback("/1/fader3", self.intensity_handler)
         self.receiver.addCallback("/1/fader5", self.speed_handler)
         self.receiver.addCallback("/2/*", self.mode_handler)
 
         # Beat Machine
         self.receiver.addCallback("/3/rotary1", self.hue_handler)
-        self.receiver.addCallback("/3/rotary2", self.sat_handler)
-        self.receiver.addCallback("/3/rotary3", self.val_handler)
+        self.receiver.addCallback("/3/rotary2", self.saturation_handler)
+        self.receiver.addCallback("/3/rotary3", self.intensity_handler)
 
         # quit
         self.receiver.addCallback("/quit", self.quit_handler)
@@ -46,10 +46,10 @@ class UDPReceiverApplication(object):
     def hue_handler(self, message, address):
         send_simple('H', message)
 
-    def sat_handler(self, message, address):
+    def saturation_handler(self, message, address):
         send_simple('S', message)
 
-    def val_handler(self, message, address):
+    def intensity_handler(self, message, address):
         send_simple('V', message)
 
     def speed_handler(self, message, address):
