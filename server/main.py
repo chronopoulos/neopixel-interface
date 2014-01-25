@@ -6,7 +6,7 @@ from txosc import async
 import serial
 import re
 
-arduino = serial.Serial('/dev/tty.usbmodem1411', baudrate=9600)
+arduino = serial.Serial('/dev/ttyACM0', baudrate=57600)
 
 class UDPReceiverApplication(object):
     def __init__(self, port):
@@ -41,7 +41,7 @@ class UDPReceiverApplication(object):
         send_simple('S', message)
 
     def intensity_handler(self, message, address):
-        send_simple('V', message)
+        send_simple('I', message)
 
     def speed_handler(self, message, address):
         send_simple('s', message)
