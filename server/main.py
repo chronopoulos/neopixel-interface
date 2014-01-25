@@ -94,7 +94,7 @@ class UDPReceiverApplication(object):
         if (message.getValues()[0] > 0.5): # only do stuff on button push, not button release
             element_number = get_number(message)
             if element_number < len(modes):
-                print modes[element_number]
+                send_mode(modes[element_number])
 
         # print("  Got %s from %s" % (message, message))
         # send_simple('m', message)
@@ -137,6 +137,14 @@ class UDPReceiverApplication(object):
         print("  Got %s from %s" % (message, address))
         reactor.stop()
         print("Goodbye.")
+
+def send_mode(letter):
+    arduino.write(chr(254)) # start
+    arduino.write('m')
+    arduino.write(letter)
+    arduino.write(chr(255)) # stop
+    print 'm'
+    print letter
 
 def send_simple(letter, message):
     values = message.getValues()
