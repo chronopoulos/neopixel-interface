@@ -6,7 +6,7 @@ from txosc import async
 import serial
 import re
 
-arduino = serial.Serial('/dev/ttyACM0', baudrate=57600)
+arduino = serial.Serial('/dev/ttyACM0', baudrate=9600)
 
 class UDPReceiverApplication(object):
     def __init__(self, port):
@@ -35,16 +35,16 @@ class UDPReceiverApplication(object):
 
 
     def hue_handler(self, message, address):
-        send_simple('H', message)
+        send_simple(1, message)
 
     def saturation_handler(self, message, address):
-        send_simple('S', message)
+        send_simple(2, message)
 
     def intensity_handler(self, message, address):
-        send_simple('I', message)
+        send_simple(3, message)
 
     def speed_handler(self, message, address):
-        send_simple('s', message)
+        send_simple(4, message)
 
     def mode_handler(self, message, address):
         if (message.getValues()[0] > 0.5): # only do stuff on button push, not button release
@@ -67,25 +67,33 @@ class UDPReceiverApplication(object):
         reactor.stop()
         print("Goodbye.")
 
-def send_mode(letter):
+def send_mode(modenum):
     arduino.write(chr(254)) # start
-    arduino.write('m')
-    arduino.write(letter)
+    print ord(chr(254))
+    arduino.write(chr(0))
+    print ord(chr(0))
+    arduino.write(chr(modenum))
+    print ord(chr(modenum))
     arduino.write(chr(255)) # stop
-    print ("Send mode to %s" % letter)
+    print ord(chr(255))
+    #print ("Send mode to %s" % letter)
 
 def send_simple(letter, message):
     values = message.getValues()
     value = values[0]
     write_message(letter, value)
 
-def write_message(letter, value):
+def write_message(flagnum, value):
     value_to_send = int(value*250)
     arduino.write(chr(254)) # start
-    arduino.write(letter)
+    print ord(chr(254))
+    arduino.write(chr(flagnum))
+    print ord(chr(flagnum))
     arduino.write(chr(value_to_send))
+    print ord(chr(value_to_send))
     arduino.write(chr(255)) # stop
-    print ("Send %s with value %d" % (letter, value_to_send))
+    print ord(chr(255))
+    #print ("Send %s with value %d" % (letter, value_to_send))
 
 def get_address(message):
     return str(message).split(' ')[0]
@@ -96,7 +104,8 @@ def get_number(message):
     element_number = int(re.sub(r'\D', '', element_string))
     return element_number
 
-modes = [None, 'u', 'r', 'f']
+#modes = [None, 'u', 'r', 'f']
+modes = [None, 0, 1, 2]
 
 if __name__ == "__main__":
     app = UDPReceiverApplication(8000)
