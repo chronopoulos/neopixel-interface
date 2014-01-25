@@ -30,20 +30,26 @@ byte *bp = &b;
 
 // GLOBAL VARIABLES:
 byte flag, value;
-byte mode, spd;
-float hue, saturation, intensity;
+byte mode = 'u';
+byte spd = 0;
+double hue = 0.5;
+double saturation = 0.5;
+double intensity = 0.5;
+
+byte rgbarray[3] = {r, g, b};
 
 void calculateFrame(void)
 {
   switch (mode)
   {
     case 'u': // uniform
-      HSV_to_RGB(hue, saturation, intensity, rp, gp, bp);
+      //HSV_to_RGB(hue, saturation, intensity, rp, gp, bp);
+      hsl2rgb(hue, saturation, intensity, rgbarray);
       for (i=0; i<nleds; i++)
       {
-        rbuff[i] = *rp;
-        gbuff[i] = *gp;
-        bbuff[i] = *bp;
+        rbuff[i] = rgbarray[0];
+        gbuff[i] = rgbarray[1];
+        bbuff[i] = rgbarray[2];
       }
   }
 }
@@ -124,7 +130,7 @@ void handleOneMessage(void)
       {
         while (Serial.available()==0) {} // wait until first byte arrives
         tmpByte = Serial.read();
-        Serial.println(tmpByte); // DEBUG!
+        //Serial.println(tmpByte); // DEBUG!
         if (tmpByte==255) // stop bit
         {
           break;
@@ -136,7 +142,7 @@ void handleOneMessage(void)
         //-------------------------------
         while (Serial.available()==0) {} // wait until next byte arrives
         tmpByte = Serial.read();
-        Serial.println(tmpByte);  // DEBUG!
+        //Serial.println(tmpByte);  // DEBUG!
         if (tmpByte==255) // stop bit
         {
           break;
@@ -150,12 +156,31 @@ void handleOneMessage(void)
       {
         case 'm':
           mode = value;
+          for (i=0; i<nleds; i++)
+          {
+            leds.setPixelColor(i, 255, 255, 255);
+          }
         case 'H': // hue
-          hue = (float) value*1.411764705882353; // 1.411764 = 360./250
+          // hue = (float) value*1.411764705882353; // 1.411764 = 360./250
+          hue = (double) value/250.; // 1.411764 = 360./250
+          for (i=0; i<nleds; i++)
+          {
+            leds.setPixelColor(i, 255, 0, 0);
+          }
         case 'S': // saturation
-          saturation = (float) value/2.5;         // 2.5 = 100./250
+          //saturation = (float) value/2.5;         // 2.5 = 100./250
+          saturation = (double) value/250.;         // 2.5 = 100./250
+          for (i=0; i<nleds; i++)
+          {
+            leds.setPixelColor(i, 0, 255, 0);
+          }
         case 'I': // intensity
-          intensity = (float) value/2.5;          // 2.5 = 100./250
+          //intensity = (float) value/2.5;          // 2.5 = 100./250
+          intensity = (double) value/250.;          // 2.5 = 100./250
+          for (i=0; i<nleds; i++)
+          {
+            leds.setPixelColor(i, 0, 0, 255);
+          }
         case 's': // speed
           spd = value; // byte value!
       }
@@ -165,7 +190,7 @@ void handleOneMessage(void)
 
 void setup()
 {
-  Serial.begin(14400);
+  Serial.begin(57600);
   leds.begin();  // Call this to start up the LED strip.
 }
 
@@ -173,10 +198,34 @@ void loop()
 {
     handleOneMessage();
     calculateFrame();
-    postFrame();
+    //postFrame();
   
 }
 
+void hsl2rgb(double h, double s, double l, byte rgb[]) {
+    double r, g, b;
 
+    if (s == 0) {
+        r = g = b = l; // achromatic
+    } else {
+        double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        double p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
 
+    rgb[0] = r * 255;
+    rgb[1] = g * 255;
+    rgb[2] = b * 255;
+}
+
+double hue2rgb(double p, double q, double t) {
+    if(t < 0) t += 1;
+    if(t > 1) t -= 1;
+    if(t < 1/6) return p + (q - p) * 6 * t;
+    if(t < 1/2) return q;
+    if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+}
 
