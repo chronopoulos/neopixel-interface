@@ -9,9 +9,11 @@ from txosc import osc
 from txosc import dispatch
 from txosc import async
 import serial
+import re
 
-arduino = serial.Serial('/dev/ttyUSB1', 14400)
+arduino = serial.Serial('/dev/tty.usbmodem1411', baudrate=9600)
 
+# /dev/tty.usbserial-FTF3MN94
 class UDPReceiverApplication(object):
     """
     Example that receives UDP OSC messages.
@@ -24,6 +26,17 @@ class UDPReceiverApplication(object):
         # self.receiver.addCallback("/*", self.wild_handler)
         # self.receiver.addCallback("/ping/*/*", self.ping_handler)
         self.receiver.addCallback("/quit", self.quit_handler)
+        # Simple
+        self.receiver.addCallback("/1/fader1", self.hue_handler)
+        self.receiver.addCallback("/1/fader2", self.sat_handler)
+        self.receiver.addCallback("/1/fader3", self.val_handler)
+        self.receiver.addCallback("/1/fader5", self.speed_handler)
+        self.receiver.addCallback("/2/*", self.mode_handler)
+
+        # Beat Machine
+        self.receiver.addCallback("/3/rotary1", self.hue_handler)
+        self.receiver.addCallback("/3/rotary2", self.sat_handler)
+        self.receiver.addCallback("/3/rotary3", self.val_handler)
         # self.receiver.addCallback("/ham/egg", self.ham_egg_handler)
         # self.receiver.addCallback("/*/egg", self.any_egg_handler)
 
@@ -64,6 +77,28 @@ class UDPReceiverApplication(object):
     #     print("any_egg_handler")
     #     print("  Got %s from %s" % (message, address))
 
+    def hue_handler(self, message, address):
+        send_simple('H', message)
+
+    def sat_handler(self, message, address):
+        send_simple('S', message)
+
+    def val_handler(self, message, address):
+        send_simple('V', message)
+
+    def speed_handler(self, message, address):
+        send_simple('s', message)
+
+    def mode_handler(self, message, address):
+        # print dir(message)
+        if (message.getValues()[0] > 0.5): # only do stuff on button push, not button release
+            element_number = get_number(message)
+            if element_number < len(modes):
+                print modes[element_number]
+
+        # print("  Got %s from %s" % (message, message))
+        # send_simple('m', message)
+
     def fallback(self, message, address):
         """
         Fallback for any unhandled message
@@ -102,6 +137,31 @@ class UDPReceiverApplication(object):
         print("  Got %s from %s" % (message, address))
         reactor.stop()
         print("Goodbye.")
+
+def send_simple(letter, message):
+    values = message.getValues()
+    value = values[0]
+    write_message(letter, value)
+
+def write_message(letter, value):
+    value_to_send = int(value*250)
+    arduino.write(chr(254)) # start
+    arduino.write(letter)
+    arduino.write(chr(value_to_send))
+    arduino.write(chr(255)) # stop
+    print letter
+    print value_to_send
+
+def get_address(message):
+    return str(message).split(' ')[0]
+
+def get_number(message):
+    address = get_address(message)
+    element_string = address.split('/')[2]
+    element_number = int(re.sub(r'\D', '', element_string))
+    return element_number
+
+modes = [None, 'u', 'r', 'f']
 
 if __name__ == "__main__":
     app = UDPReceiverApplication(17779)
