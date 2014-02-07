@@ -39,6 +39,14 @@ byte b;
 float h, s, v;
 
 ///////////////////////////////////
+// rainbow shit
+
+int rainbowOffset = 0;
+//int rainbowScale = 192/nleds;
+int rainbowScale = 4;
+uint32_t tmpColor;
+
+///////////////////////////////////
 
 void HSV_to_RGB(float h, float s, float v, byte *r, byte *g, byte *b)
 {
@@ -181,24 +189,80 @@ void handleOneMessage(void)
           break;
         case 's': // speed
           spd = value;
+          break;
+        case 'o': // rainbow offset
+          rainbowOffset = value*nleds/250; // make sure this is reasonable
+          break;
       }
     }  
 }
 
+uint32_t rainbowColor(byte position) 
+{
+  // 6 total zones of color change:
+  if (position < 31)  // Red -> Yellow (Red = FF, blue = 0, green goes 00-FF)
+  {
+    return leds.Color(0xFF, position * 8, 0);
+  }
+  else if (position < 63)  // Yellow -> Green (Green = FF, blue = 0, red goes FF->00)
+  {
+    position -= 31;
+    return leds.Color(0xFF - position * 8, 0xFF, 0);
+  }
+  else if (position < 95)  // Green->Aqua (Green = FF, red = 0, blue goes 00->FF)
+  {
+    position -= 63;
+    return leds.Color(0, 0xFF, position * 8);
+  }
+  else if (position < 127)  // Aqua->Blue (Blue = FF, red = 0, green goes FF->00)
+  {
+    position -= 95;
+    return leds.Color(0, 0xFF - position * 8, 0xFF);
+  }
+  else if (position < 159)  // Blue->Fuchsia (Blue = FF, green = 0, red goes 00->FF)
+  {
+    position -= 127;
+    return leds.Color(position * 8, 0, 0xFF);
+  }
+  else  //160 <position< 191   Fuchsia->Red (Red = FF, green = 0, blue goes FF->00)
+  {
+    position -= 159;
+    return leds.Color(0xFF, 0x00, 0xFF - position * 8);
+  }
+}
+
 
 void calculateFrame(void)
+// perhaps this function should just call leds.setPixelColor()?
 {
   switch (mode)
   {
     case 'u': // uniform
-      //HSV_to_RGB(hue, saturation, intensity, rp, gp, bp);
-      //hsl2rgb(hue, saturation, intensity, rgbarray);
       HSV_to_RGB(h, s, v, &r, &g, &b);
       for (i=0; i<nleds; i++)
       {
         rbuff[i] = r;
         gbuff[i] = g;
         bbuff[i] = b;
+      }
+      break;
+    case 'r': // automatic rainbow
+      for (i=0; i<nleds; i++)
+      {
+        tmpColor = rainbowColor((rainbowScale*(i+rainbowOffset))%192);
+        rbuff[i] = tmpColor >> 16 ;
+        gbuff[i] = tmpColor >> 8;
+        bbuff[i] = tmpColor;
+      }
+      rainbowOffset = (rainbowOffset + 1)%nleds;
+      break;
+    case 'R': // manual rainbow
+      for (i=0; i<nleds; i++)
+      {
+        tmpColor = rainbowColor((rainbowScale*(i+rainbowOffset))%192);
+        rbuff[i] = tmpColor >> 16 ;
+        gbuff[i] = tmpColor >> 8;
+        bbuff[i] = tmpColor;
       }
       break;
   }
@@ -217,7 +281,7 @@ void postFrame(void)
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(57600);
   leds.begin();  // Call this to start up the LED strip.
 }
 
