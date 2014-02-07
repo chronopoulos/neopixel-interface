@@ -6,7 +6,7 @@ from txosc import async
 import serial
 import re
 
-arduino = serial.Serial('/dev/ttyACM0', baudrate=9600)
+arduino = serial.Serial('/dev/ttyACM0', baudrate=57600)
 
 class UDPReceiverApplication(object):
     def __init__(self, port):
@@ -19,6 +19,7 @@ class UDPReceiverApplication(object):
         self.receiver.addCallback("/1/fader1", self.hue_handler)
         self.receiver.addCallback("/1/fader2", self.saturation_handler)
         self.receiver.addCallback("/1/fader3", self.intensity_handler)
+        self.receiver.addCallback("/1/fader4", self.handle_fader4)
         self.receiver.addCallback("/1/fader5", self.speed_handler)
         self.receiver.addCallback("/2/*", self.mode_handler)
 
@@ -46,8 +47,11 @@ class UDPReceiverApplication(object):
     def speed_handler(self, message, address):
         send_simple('s', message)
 
+    def handle_fader4(self, message, address):
+        send_simple('o', message) # o for rainbowOffset
+
     def mode_handler(self, message, address):
-        if (message.getValues()[0] > 0.5): # only do stuff on button push, not button release
+        if (message.getValues()[0]==1): # only do stuff on button push, not button release
             element_number = get_number(message)
             if element_number < len(modes):
                 send_mode(modes[element_number])
@@ -96,7 +100,7 @@ def get_number(message):
     element_number = int(re.sub(r'\D', '', element_string))
     return element_number
 
-modes = [None, 'u', 'r', 'f']
+modes = [None, 'u', 'r', 'R']
 
 if __name__ == "__main__":
     app = UDPReceiverApplication(8000)
