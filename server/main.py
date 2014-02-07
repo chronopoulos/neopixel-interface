@@ -6,7 +6,7 @@ from txosc import async
 import serial
 import re
 
-arduino = serial.Serial('/dev/ttyACM0', baudrate=57600)
+arduino = serial.Serial('/dev/ttyACM0', baudrate=9600)
 
 class UDPReceiverApplication(object):
     def __init__(self, port):
