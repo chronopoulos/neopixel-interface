@@ -87,8 +87,9 @@ def send_simple(letter, message):
 
 def write_message(letter, value):
     now = datetime.now()
-    elapsedTimeInMs = (now - last_msg_time) * 1000
-    if (elapsedTimeInMs > 30): # if at least 30 milliseconds have elapsed
+    global last_msg_time
+    elapsed_time_ms = (now - last_msg_time) * 1000
+    if (elapsed_time_ms > 30): # if at least 30 milliseconds have elapsed
         value_to_send = int(value*250)
         arduino.write(chr(254)) # start
         arduino.write(letter)
@@ -97,7 +98,7 @@ def write_message(letter, value):
         last_msg_time = now
         print ("Send %s with value %d" % (letter, value_to_send))
     else:
-        print ("Throttled message after %d ms" % elapsedTimeInMs)
+        print ("Throttled message after %d ms" % elapsed_time_ms)
 
 def get_address(message):
     return str(message).split(' ')[0]
