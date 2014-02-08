@@ -5,8 +5,10 @@ from txosc import dispatch
 from txosc import async
 import serial
 import re
+from datetime import datetime
 
 arduino = serial.Serial('/dev/ttyACM0', baudrate=57600)
+last_msg_time = datetime.now()
 
 class UDPReceiverApplication(object):
     def __init__(self, port):
@@ -19,7 +21,7 @@ class UDPReceiverApplication(object):
         self.receiver.addCallback("/1/fader1", self.hue_handler)
         self.receiver.addCallback("/1/fader2", self.saturation_handler)
         self.receiver.addCallback("/1/fader3", self.intensity_handler)
-        self.receiver.addCallback("/1/fader4", self.handle_fader4)
+        self.receiver.addCallback("/1/fader4", self.offset_handler)
         self.receiver.addCallback("/1/fader5", self.speed_handler)
         self.receiver.addCallback("/2/*", self.mode_handler)
 
@@ -44,11 +46,11 @@ class UDPReceiverApplication(object):
     def intensity_handler(self, message, address):
         send_simple('I', message)
 
+    def offset_handler(self, message, address):
+        send_simple('o', message) # o for rainbowOffset
+
     def speed_handler(self, message, address):
         send_simple('s', message)
-
-    def handle_fader4(self, message, address):
-        send_simple('o', message) # o for rainbowOffset
 
     def mode_handler(self, message, address):
         if (message.getValues()[0]==1): # only do stuff on button push, not button release
@@ -84,12 +86,18 @@ def send_simple(letter, message):
     write_message(letter, value)
 
 def write_message(letter, value):
-    value_to_send = int(value*250)
-    arduino.write(chr(254)) # start
-    arduino.write(letter)
-    arduino.write(chr(value_to_send))
-    arduino.write(chr(255)) # stop
-    print ("Send %s with value %d" % (letter, value_to_send))
+    now = datetime.now()
+    elapsedTimeInMs = (now - last_msg_time) * 1000
+    if (elapsedTimeInMs > 30) # if at least 30 milliseconds have elapsed
+        value_to_send = int(value*250)
+        arduino.write(chr(254)) # start
+        arduino.write(letter)
+        arduino.write(chr(value_to_send))
+        arduino.write(chr(255)) # stop
+        last_msg_time = now
+        print ("Send %s with value %d" % (letter, value_to_send))
+    else
+        print ("Throttled message after %d ms" % elapsedTimeInMs)
 
 def get_address(message):
     return str(message).split(' ')[0]
