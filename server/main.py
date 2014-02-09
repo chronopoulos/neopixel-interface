@@ -7,7 +7,7 @@ import serial
 import re
 from datetime import datetime
 
-arduino = serial.Serial('/dev/ttyACM0', baudrate=9600)
+arduino = serial.Serial('/dev/tty.usbserial-FTF3MN94', baudrate=9600)
 last_msg_time = datetime.now()
 
 class UDPReceiverApplication(object):
@@ -30,12 +30,29 @@ class UDPReceiverApplication(object):
         self.receiver.addCallback("/3/rotary2", self.saturation_handler)
         self.receiver.addCallback("/3/rotary3", self.intensity_handler)
 
-        # quit
-        self.receiver.addCallback("/quit", self.quit_handler)
+        # Pillow Room
+        self.receiver.addCallback("/*", self.mode_page_handler)
+        self.receiver.addCallback("/uniform/*", self.uniform_handler)
 
         # fallback:
         self.receiver.fallback = self.fallback
 
+    def uniform_handler(self, message, address):
+        elements_dict ={
+            'hue_encoder': self.hue_handler,
+            'sat_fader': self.saturation_handler,
+            'intensity_fader': self.intensity_handler
+        }
+        print 'this doesn\'t really do anything yet'
+
+    def mode_page_handler(self, message, address):
+        mode_lookup = {
+            'uniform' : 'u',
+            'rainbow' : 'r',
+            'wheel' : 'w',
+            'fade' : 'f'
+        }
+        send_mode(mode_lookup[get_page(message)])
 
     def hue_handler(self, message, address):
         send_simple('H', message)
@@ -98,12 +115,19 @@ def write_message(letter, value):
         last_msg_time = now
         print ("Send %s with value %d" % (letter, value_to_send))
 
-def get_address(message):
+def get_path(message):
     return str(message).split(' ')[0]
 
+def get_page(message):
+    path = get_path(message)
+    return path.split('/')[1]
+
+def get_element(message):
+    path = get_path(message)
+    return path.split('/')[2]
+
 def get_number(message):
-    address = get_address(message)
-    element_string = address.split('/')[2]
+    element_string = get_element(message)
     element_number = int(re.sub(r'\D', '', element_string))
     return element_number
 
