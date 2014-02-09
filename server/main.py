@@ -107,7 +107,7 @@ def get_number(message):
     element_number = int(re.sub(r'\D', '', element_string))
     return element_number
 
-modes = [None, 'u', 'r', 'R']
+modes = [None, 'u', 'r', 'R', 'w', 'f']
 
 if __name__ == "__main__":
     app = UDPReceiverApplication(8000)
