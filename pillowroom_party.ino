@@ -287,7 +287,11 @@ void calculateFrame(void)
         gbuff[i] = g;
         bbuff[i] = b;
       }
-      fadeValue = (fadeValue + .01) % (2 * pi); // ranges from 0 to 2pi
+      fadeValue += .01
+      if (fadeValue > (10*pi)) // ranges from 0 to 10pi
+      {
+        fadeValue = 0;
+      }
       break;
   }
 }
