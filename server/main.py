@@ -98,8 +98,7 @@ def write_message(letter, value):
         last_msg_time = now
         #print ("Send %s with value %d" % (letter, value_to_send))
     else:
-        pass
-        #print ("Throttled message after %d ms" % elapsedTimeInMs)
+        print ("Throttled message after %d ms" % elapsed_time_ms)
 
 def get_address(message):
     return str(message).split(' ')[0]

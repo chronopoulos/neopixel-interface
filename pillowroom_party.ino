@@ -52,20 +52,20 @@ void HSV_to_RGB(float h, float s, float v, byte *r, byte *g, byte *b)
 {
   int i;
   float f,p,q,t;
-  
+
   h = max(0.0, min(360.0, h));
   s = max(0.0, min(100.0, s));
   v = max(0.0, min(100.0, v));
-  
+
   s /= 100;
   v /= 100;
-  
+
   if(s == 0) {
     // Achromatic (grey)
     *r = *g = *b = round(v*255);
     return;
   }
- 
+
   h /= 60; // sector 0 to 5
   i = floor(h);
   f = h - i; // factorial part of h
@@ -156,7 +156,7 @@ void handleOneMessage(void)
         if (tmpByte==255) // stop byte
         {
           break;
-        } 
+        }
         else
         {
           flag = tmpByte;
@@ -167,7 +167,7 @@ void handleOneMessage(void)
         if (tmpByte==255) // stop byte
         {
           break;
-        } 
+        }
         else
         {
           value = tmpByte;
@@ -194,10 +194,10 @@ void handleOneMessage(void)
           rainbowOffset = value*nleds/250; // make sure this is reasonable
           break;
       }
-    }  
+    }
 }
 
-uint32_t rainbowColor(byte position) 
+uint32_t rainbowColor(byte position)
 {
   // 6 total zones of color change:
   if (position < 31)  // Red -> Yellow (Red = FF, blue = 0, green goes 00-FF)
@@ -281,7 +281,7 @@ void postFrame(void)
 
 void setup()
 {
-  Serial.begin(57600);
+  Serial.begin(9600);
   leds.begin();  // Call this to start up the LED strip.
 }
 
