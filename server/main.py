@@ -7,7 +7,7 @@ import serial
 import re
 from datetime import datetime
 
-arduino = serial.Serial('/dev/ttyACM0', baudrate=57600)
+arduino = serial.Serial('/dev/ttyACM0', baudrate=9600)
 last_msg_time = datetime.now()
 
 class UDPReceiverApplication(object):
@@ -86,8 +86,9 @@ def send_simple(letter, message):
     write_message(letter, value)
 
 def write_message(letter, value):
+    global last_msg_time
     now = datetime.now()
-    elapsedTimeInMs = (now - last_msg_time) * 1000
+    elapsedTimeInMs = (now - last_msg_time).total_seconds() * 1000
     if (elapsedTimeInMs > 30): # if at least 30 milliseconds have elapsed
         value_to_send = int(value*250)
         arduino.write(chr(254)) # start
@@ -95,9 +96,10 @@ def write_message(letter, value):
         arduino.write(chr(value_to_send))
         arduino.write(chr(255)) # stop
         last_msg_time = now
-        print ("Send %s with value %d" % (letter, value_to_send))
+        #print ("Send %s with value %d" % (letter, value_to_send))
     else:
-        print ("Throttled message after %d ms" % elapsedTimeInMs)
+        pass
+        #print ("Throttled message after %d ms" % elapsedTimeInMs)
 
 def get_address(message):
     return str(message).split(' ')[0]
