@@ -15,7 +15,7 @@ Adafruit_NeoPixel leds = Adafruit_NeoPixel(nleds, DATA_PIN, NEO_GRB + NEO_KHZ800
 int i = 0;
 int j = 0;
 
-const float pi = 3.1415
+const float pi = 3.1415;
 
 byte rbuff[nleds];
 byte gbuff[nleds];
@@ -49,8 +49,8 @@ uint32_t tmpColor;
 
 ////////////////////////
 ///// wheel and fade
-float wheelHue = 0 // max 360
-float fadeValue = 0 // 0 to 2 pi
+float wheelHue = 0; // max 360
+float fadeValue = 0; // 0 to 2 pi
 
 void HSV_to_RGB(float h, float s, float v, byte *r, byte *g, byte *b)
 {
@@ -277,18 +277,17 @@ void calculateFrame(void)
         gbuff[i] = g;
         bbuff[i] = b;
       }
-      wheelHue = (wheelHue + 1) % 360 // spin the wheel
+      wheelHue = ((int)wheelHue + 1) % 360; // spin the wheel
       break;
     case 'f': // fade with sine
-      fadedV = ((sine(fadeValue)/2 + 0.5) * v // ranges from 0 to v
-      HSV_to_RGB(h, s, fadedV, &r, &g, &b);
+      HSV_to_RGB(h, s, (sin(fadeValue)/2 + 0.5)*v, &r, &g, &b);
       for (i=0; i<nleds; i++)
       {
         rbuff[i] = r;
         gbuff[i] = g;
         bbuff[i] = b;
       }
-      fadeValue = (fadeValue + .01) % (2 * pi) // ranges from 0 to 2pi
+      fadeValue = (fadeValue + .01) % (2 * pi); // ranges from 0 to 2pi
       break;
   }
 }
