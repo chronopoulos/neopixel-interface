@@ -183,7 +183,7 @@ void handleOneMessage(void)
           mode = value;
           break;
         case 'H': // hue
-          h = value*1.44;
+          h = value*1.43426; // evenly space 251 values around the hue wheel
           break;
         case 'S': // saturation
           s = value*0.4;
