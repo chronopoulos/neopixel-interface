@@ -9,6 +9,7 @@ from datetime import datetime
 
 arduino = serial.Serial('/dev/tty.usbserial-FTF3MN94', baudrate=9600)
 last_msg_time = datetime.now()
+uniform_hue = 0
 
 class UDPReceiverApplication(object):
     def __init__(self, port):
@@ -38,12 +39,23 @@ class UDPReceiverApplication(object):
         self.receiver.fallback = self.fallback
 
     def uniform_handler(self, message, address):
+        def send_hue(message):
+            value = message.getValues()[0]
+            global uniform_hue
+            if (value == 1):
+                uniform_hue += 1
+            else:
+                uniform_hue -= 1
+            uniform_hue = uniform_hue % 251
+            write_message('H', uniform_hue)
+
         elements_dict ={
-            'hue_encoder': self.hue_handler,
+            'hue_encoder': send_hue,
             'sat_fader': self.saturation_handler,
             'intensity_fader': self.intensity_handler
         }
-        print 'this doesn\'t really do anything yet'
+        elements_dict[get_element(message)](message)
+
 
     def mode_page_handler(self, message, address):
         mode_lookup = {
@@ -57,10 +69,10 @@ class UDPReceiverApplication(object):
     def hue_handler(self, message, address):
         send_simple('H', message)
 
-    def saturation_handler(self, message, address):
+    def saturation_handler(self, message, *args):
         send_simple('S', message)
 
-    def intensity_handler(self, message, address):
+    def intensity_handler(self, message, *args):
         send_simple('I', message)
 
     def offset_handler(self, message, address):
@@ -100,20 +112,22 @@ def send_mode(letter):
 def send_simple(letter, message):
     values = message.getValues()
     value = values[0]
-    write_message(letter, value)
+    value_to_send = int(value*250)
+    write_message(letter, value_to_send)
 
-def write_message(letter, value):
+def write_message(letter, value_to_send):
     global last_msg_time
     now = datetime.now()
     elapsed_time_ms = (now - last_msg_time).total_seconds() * 1000
     if (elapsed_time_ms > 30): # if at least 30 milliseconds have elapsed
-        value_to_send = int(value*250)
         arduino.write(chr(254)) # start
         arduino.write(letter)
         arduino.write(chr(value_to_send))
         arduino.write(chr(255)) # stop
         last_msg_time = now
         print ("Send %s with value %d" % (letter, value_to_send))
+    else:
+        print 'throttled'
 
 def get_path(message):
     return str(message).split(' ')[0]
