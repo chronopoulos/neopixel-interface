@@ -34,23 +34,27 @@ class UDPReceiverApplication(object):
         # Pillow Room
         self.receiver.addCallback("/*", self.mode_page_handler)
         self.receiver.addCallback("/uniform/*", self.uniform_handler)
+        # self.receiver.addCallback("/rainbow/*", self.rainbow_handler)
+        self.receiver.addCallback("/wheel/*", self.wheel_handler)
+        self.receiver.addCallback("/fade/*", self.fade_handler)
 
         # fallback:
         self.receiver.fallback = self.fallback
 
     def uniform_handler(self, message, address):
-        def send_hue(message):
-            value = message.getValues()[0]
-            global uniform_hue
-            if (value == 1):
-                uniform_hue += 1
-            else:
-                uniform_hue -= 1
-            uniform_hue = uniform_hue % 251
-            write_message('H', uniform_hue)
+        elements_dict = {
+            'hue_encoder': self.send_encoder_hue,
+            'sat_fader': self.saturation_handler,
+            'intensity_fader': self.intensity_handler
+        }
+        elements_dict[get_element(message)](message)
 
-        elements_dict ={
-            'hue_encoder': send_hue,
+    def wheel_handler(self, message, address):
+        print 'this should never get hit till controls are added'
+
+    def fade_handler(self, message, address):
+        elements_dict = {
+            'hue_encoder': self.send_encoder_hue,
             'sat_fader': self.saturation_handler,
             'intensity_fader': self.intensity_handler
         }
@@ -58,13 +62,27 @@ class UDPReceiverApplication(object):
 
 
     def mode_page_handler(self, message, address):
-        mode_lookup = {
+        mode_char_lookup = {
             'uniform' : 'u',
             'rainbow' : 'r',
             'wheel' : 'w',
             'fade' : 'f'
         }
-        send_mode(mode_lookup[get_page(message)])
+        mode_string = get_page(message)
+        if mode_string in mode_char_lookup:
+            send_mode(mode_char_lookup[mode_string])
+        else:
+            print 'invalid mode sent'
+
+    def send_encoder_hue(self, message):
+        value = message.getValues()[0]
+        global uniform_hue
+        if (value == 1):
+            uniform_hue += 1
+        else:
+            uniform_hue -= 1
+        uniform_hue = uniform_hue % 251
+        write_message('H', uniform_hue)
 
     def hue_handler(self, message, address):
         send_simple('H', message)
