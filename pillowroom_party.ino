@@ -53,6 +53,7 @@ uint32_t tmpColor;
 ///// wheel and fade
 float wheelHue = 0; // max 360
 float fadeValue = 0; // 0 to 2 pi
+int wheelShiftCounter = 0;
 
 void HSV_to_RGB(float h, float s, float v, byte *r, byte *g, byte *b)
 {
@@ -284,7 +285,12 @@ void calculateFrame(void)
         gbuff[i] = g;
         bbuff[i] = b;
       }
-      wheelHue = ((int)wheelHue + 1) % 360; // spin the wheel
+      wheelShiftCounter += spd; // counter increments according to speed
+      if (wheelShiftCounter > 249) // only auto-shift the rainbow when counter is high enough
+      {
+        wheelHue = ((int)wheelHue + 1) % 360; // spin the wheel
+        wheelShiftCounter = wheelShiftCounter % 250;
+      }
       break;
     case 'f': // fade with sine
       HSV_to_RGB(h, s, (sin(fadeValue)/2 + 0.5)*v, &r, &g, &b);
