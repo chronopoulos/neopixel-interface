@@ -29,13 +29,13 @@ byte mode = 'u';
 byte spd = 0;
 
 byte r;
-//byte *rp = &r;
 byte g;
-//byte *gp = &g;
 byte b;
-//byte *bp = &b;
 
-float h, s, v;
+
+float h=0;
+float s=100;
+float v=50;
 
 ///////////////////////////////////
 // rainbow shit
@@ -53,7 +53,6 @@ uint32_t tmpColor;
 ///// wheel and fade
 float wheelHue = 0; // max 360
 float fadeValue = 0; // 0 to 2 pi
-int wheelShiftCounter = 0;
 
 void HSV_to_RGB(float h, float s, float v, byte *r, byte *g, byte *b)
 {
@@ -285,11 +284,10 @@ void calculateFrame(void)
         gbuff[i] = g;
         bbuff[i] = b;
       }
-      wheelShiftCounter += spd; // counter increments according to speed
-      if (wheelShiftCounter > 249) // only auto-shift the rainbow when counter is high enough
+      wheelHue = wheelHue + (float)spd/250;
+      if (wheelHue >= 360)
       {
-        wheelHue = ((int)wheelHue + 1) % 360; // spin the wheel
-        wheelShiftCounter = wheelShiftCounter % 250;
+        wheelHue = wheelHue - 360;
       }
       break;
     case 'f': // fade with sine
