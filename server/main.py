@@ -160,7 +160,7 @@ def write_message(letter, value_to_send):
     global last_msg_time
     now = datetime.now()
     elapsed_time_ms = (now - last_msg_time).total_seconds() * 1000
-    if (elapsed_time_ms > 30): # if at least 30 milliseconds have elapsed
+    if (elapsed_time_ms > 10): # if at least n milliseconds have elapsed
         arduino.write(chr(254)) # start
         arduino.write(letter)
         arduino.write(chr(value_to_send))
