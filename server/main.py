@@ -58,7 +58,12 @@ class UDPReceiverApplication(object):
         elements_dict[get_element(message)](message)
 
     def wheel_handler(self, message, address):
-        print 'this should never get hit till controls are added'
+        elements_dict = {
+            'speed_fader': self.speed_handler,
+            'sat_fader': self.saturation_handler,
+            'intensity_fader': self.intensity_handler
+        }
+        elements_dict[get_element(message)](message)
 
     def fade_handler(self, message, address):
         elements_dict = {
