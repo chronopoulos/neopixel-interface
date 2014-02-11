@@ -7,7 +7,7 @@ import serial
 import re
 from datetime import datetime
 
-arduino = serial.Serial('/dev/tty.usbserial-FTF3MN94', baudrate=9600)
+arduino = serial.Serial('/dev/ttyACM0', baudrate=9600)
 last_msg_time = datetime.now()
 uniform_hue = 0
 offset = 0
