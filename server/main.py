@@ -88,24 +88,26 @@ class UDPReceiverApplication(object):
             print 'invalid mode sent'
 
     def send_encoder_hue(self, message):
-        value = message.getValues()[0]
-        global uniform_hue
-        if (value == 1):
-            uniform_hue += 1
-        else:
-            uniform_hue -= 1
-        uniform_hue = uniform_hue % 251
-        write_message('H', uniform_hue)
+        if (check_ready()):
+            value = message.getValues()[0]
+            global uniform_hue
+            if (value == 1):
+                uniform_hue += 1
+            else:
+                uniform_hue -= 1
+            uniform_hue = uniform_hue % 251
+            write_message('H', uniform_hue)
 
     def send_encoder_offset(self, message):
-        value = message.getValues()[0]
-        global offset
-        if (value == 1):
-            offset += 1
-        else:
-            offset -= 1
-        offset = offset % 251
-        write_message('o', offset)
+        if (check_ready()):
+            value = message.getValues()[0]
+            global offset
+            if (value == 1):
+                offset += 1
+            else:
+                offset -= 1
+            offset = offset % 251
+            write_message('o', offset)
 
     def hue_handler(self, message, address):
         send_simple('H', message)
@@ -158,17 +160,24 @@ def send_simple(letter, message):
 
 def write_message(letter, value_to_send):
     global last_msg_time
-    now = datetime.now()
-    elapsed_time_ms = (now - last_msg_time).total_seconds() * 1000
-    if (elapsed_time_ms > 10): # if at least n milliseconds have elapsed
+    if (check_ready()): # if at least n milliseconds have elapsed
         arduino.write(chr(254)) # start
         arduino.write(letter)
         arduino.write(chr(value_to_send))
         arduino.write(chr(255)) # stop
-        last_msg_time = now
+        last_msg_time = datetime.now()
         print ("Send %s with value %d" % (letter, value_to_send))
     else:
         print 'throttled'
+
+def check_ready(timeout=5):
+    global last_msg_time
+    now = datetime.now()
+    elapsed_time_ms = (now - last_msg_time).total_seconds() * 1000
+    if (elapsed_time_ms > timeout): # if at least n milliseconds have elapsed
+        return True
+    else:
+        return False
 
 def get_path(message):
     return str(message).split(' ')[0]
