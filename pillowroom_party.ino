@@ -42,6 +42,7 @@ float h, s, v;
 
 int autoRainbowOffset = 0;
 int manualRainbowOffset = 0;
+int rainbowShiftCounter = 0;
 //int rainbowScale = 192/nleds;
 int rainbowScale = 4;
 uint32_t tmpColor;
@@ -259,7 +260,12 @@ void calculateFrame(void)
         gbuff[i] = tmpColor >> 8;
         bbuff[i] = tmpColor;
       }
-      autoRainbowOffset = (autoRainbowOffset + 1)%nleds;
+      rainbowShiftCounter += spd; // counter increments according to speed
+      if (rainbowShiftCounter > 249) // only auto-shift the rainbow when counter is high enough
+      {
+        autoRainbowOffset = (autoRainbowOffset + 1)%nleds;
+        rainbowShiftCounter = rainbowShiftCounter % 250;
+      }
       break;
     case 'R': // manual rainbow
       for (i=0; i<nleds; i++)
