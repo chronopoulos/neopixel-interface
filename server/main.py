@@ -10,6 +10,7 @@ from datetime import datetime
 arduino = serial.Serial('/dev/tty.usbserial-FTF3MN94', baudrate=9600)
 last_msg_time = datetime.now()
 uniform_hue = 0
+offset = 0
 
 class UDPReceiverApplication(object):
     def __init__(self, port):
@@ -34,7 +35,7 @@ class UDPReceiverApplication(object):
         # Pillow Room
         self.receiver.addCallback("/*", self.mode_page_handler)
         self.receiver.addCallback("/uniform/*", self.uniform_handler)
-        # self.receiver.addCallback("/rainbow/*", self.rainbow_handler)
+        self.receiver.addCallback("/rainbow/*", self.rainbow_handler)
         self.receiver.addCallback("/wheel/*", self.wheel_handler)
         self.receiver.addCallback("/fade/*", self.fade_handler)
 
@@ -46,6 +47,13 @@ class UDPReceiverApplication(object):
             'hue_encoder': self.send_encoder_hue,
             'sat_fader': self.saturation_handler,
             'intensity_fader': self.intensity_handler
+        }
+        elements_dict[get_element(message)](message)
+
+    def rainbow_handler(self, message, address):
+        elements_dict = {
+            'position_encoder': self.send_encoder_offset,
+            'speed_fader': self.speed_handler
         }
         elements_dict[get_element(message)](message)
 
@@ -84,6 +92,16 @@ class UDPReceiverApplication(object):
         uniform_hue = uniform_hue % 251
         write_message('H', uniform_hue)
 
+    def send_encoder_offset(self, message):
+        value = message.getValues()[0]
+        global offset
+        if (value == 1):
+            offset += 1
+        else:
+            offset -= 1
+        offset = offset % 251
+        write_message('o', offset)
+
     def hue_handler(self, message, address):
         send_simple('H', message)
 
@@ -96,7 +114,7 @@ class UDPReceiverApplication(object):
     def offset_handler(self, message, address):
         send_simple('o', message) # o for rainbowOffset
 
-    def speed_handler(self, message, address):
+    def speed_handler(self, message, *args):
         send_simple('s', message)
 
     def mode_handler(self, message, address):
