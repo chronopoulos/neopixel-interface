@@ -40,7 +40,9 @@ float h, s, v;
 ///////////////////////////////////
 // rainbow shit
 
-int rainbowOffset = 0;
+int autoRainbowOffset = 0;
+int manualRainbowOffset = 0;
+int rainbowShiftCounter = 0;
 //int rainbowScale = 192/nleds;
 int rainbowScale = 4;
 uint32_t tmpColor;
@@ -195,7 +197,7 @@ void handleOneMessage(void)
           spd = value;
           break;
         case 'o': // rainbow offset
-          rainbowOffset = value*nleds/250; // make sure this is reasonable
+          manualRainbowOffset = value*nleds/250; // make sure this is reasonable
           break;
       }
     }
@@ -253,17 +255,22 @@ void calculateFrame(void)
     case 'r': // automatic rainbow
       for (i=0; i<nleds; i++)
       {
-        tmpColor = rainbowColor((rainbowScale*(i+rainbowOffset))%192);
+        tmpColor = rainbowColor((rainbowScale*(i+autoRainbowOffset+manualRainbowOffset))%192);
         rbuff[i] = tmpColor >> 16 ;
         gbuff[i] = tmpColor >> 8;
         bbuff[i] = tmpColor;
       }
-      rainbowOffset = (rainbowOffset + 1)%nleds;
+      rainbowShiftCounter += spd; // counter increments according to speed
+      if (rainbowShiftCounter > 249) // only auto-shift the rainbow when counter is high enough
+      {
+        autoRainbowOffset = (autoRainbowOffset + 1)%nleds;
+        rainbowShiftCounter = rainbowShiftCounter % 250;
+      }
       break;
     case 'R': // manual rainbow
       for (i=0; i<nleds; i++)
       {
-        tmpColor = rainbowColor((rainbowScale*(i+rainbowOffset))%192);
+        tmpColor = rainbowColor((rainbowScale*(i+manualRainbowOffset))%192);
         rbuff[i] = tmpColor >> 16 ;
         gbuff[i] = tmpColor >> 8;
         bbuff[i] = tmpColor;
