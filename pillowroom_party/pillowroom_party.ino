@@ -7,7 +7,7 @@
 #include <Adafruit_NeoPixel.h>
 //#include "WS2812_Definitions.h"
 
-#define nleds 119
+#define nleds 59
 #define DATA_PIN 2
 
 Adafruit_NeoPixel leds = Adafruit_NeoPixel(nleds, DATA_PIN, NEO_GRB + NEO_KHZ800);
@@ -44,7 +44,8 @@ int autoRainbowOffset = 0;
 int manualRainbowOffset = 0;
 int rainbowShiftCounter = 0;
 //int rainbowScale = 192/nleds;
-int rainbowScale = 4;
+int totalOffset;
+int rainbowScale = 8;
 uint32_t tmpColor;
 
 ///////////////////////////////////
@@ -197,7 +198,7 @@ void handleOneMessage(void)
           spd = value;
           break;
         case 'o': // rainbow offset
-          manualRainbowOffset = value*nleds/250; // make sure this is reasonable
+          manualRainbowOffset = value*191/250;
           break;
       }
     }
@@ -253,17 +254,19 @@ void calculateFrame(void)
       }
       break;
     case 'r': // automatic rainbow
+      totalOffset = autoRainbowOffset+manualRainbowOffset;
       for (i=0; i<nleds; i++)
       {
-        tmpColor = rainbowColor((rainbowScale*(i+autoRainbowOffset+manualRainbowOffset))%192);
-        rbuff[i] = tmpColor >> 16 ;
+//        HSV_to_RGB((rainbowScale*i+autoRainbowOffset+manualRainbowOffset)%360, 100.0, 100.0, &r, &g, &b);
+        tmpColor = rainbowColor((rainbowScale*i+(totalOffset))%191);
+        rbuff[i] = tmpColor >> 16;
         gbuff[i] = tmpColor >> 8;
         bbuff[i] = tmpColor;
       }
       rainbowShiftCounter += spd; // counter increments according to speed
       if (rainbowShiftCounter > 249) // only auto-shift the rainbow when counter is high enough
       {
-        autoRainbowOffset = (autoRainbowOffset + 1)%nleds;
+        autoRainbowOffset = (autoRainbowOffset + 1)%191;
         rainbowShiftCounter = rainbowShiftCounter % 250;
       }
       break;
