@@ -45,7 +45,7 @@ int manualRainbowOffset = 0;
 int rainbowShiftCounter = 0;
 //int rainbowScale = 192/nleds;
 int totalOffset;
-int rainbowScale = 8;
+int rainbowScale = 6;
 uint32_t tmpColor;
 
 ///////////////////////////////////
@@ -198,7 +198,7 @@ void handleOneMessage(void)
           spd = value;
           break;
         case 'o': // rainbow offset
-          manualRainbowOffset = value*191/250;
+          manualRainbowOffset = (int)((float)value*191/250);
           break;
       }
     }
