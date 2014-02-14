@@ -25,7 +25,7 @@ byte tmpByte;
 
 // state variables
 byte flag, value;
-byte mode = 'u';
+byte mode = 'f'; // fade mode is default
 byte spd = 0;
 
 byte r;
@@ -33,9 +33,9 @@ byte g;
 byte b;
 
 
-float h=0;
+float h=355;
 float s=100;
-float v=50;
+float v=5;
 
 ///////////////////////////////////
 // rainbow shit
