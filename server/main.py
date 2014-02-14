@@ -6,8 +6,11 @@ from txosc import async
 import serial
 import re
 from datetime import datetime
+import time
 
 arduino = serial.Serial('/dev/ttyACM0', baudrate=9600)
+time.sleep(1.5) # sleep while wait for handshake to complete
+
 last_msg_time = datetime.now()
 uniform_hue = 0
 offset = 0
@@ -41,6 +44,9 @@ class UDPReceiverApplication(object):
 
         # fallback:
         self.receiver.fallback = self.fallback
+
+
+        send_mode('u'); # when server starts, set mode to uniform
 
     def uniform_handler(self, message, address):
         elements_dict = {
