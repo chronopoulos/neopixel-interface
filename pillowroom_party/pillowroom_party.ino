@@ -26,16 +26,16 @@ byte tmpByte;
 // state variables
 byte flag, value;
 byte mode = 'f'; // fade mode is default
-byte spd = 0;
+byte spd = 20;
 
 byte r;
 byte g;
 byte b;
 
 
-float h=355;
+float h=352; // crazy pink
 float s=100;
-float v=5;
+float v=2;
 
 ///////////////////////////////////
 // rainbow shit
