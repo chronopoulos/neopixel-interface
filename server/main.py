@@ -54,14 +54,22 @@ class UDPReceiverApplication(object):
             'sat_fader': self.saturation_handler,
             'intensity_fader': self.intensity_handler
         }
-        elements_dict[get_element(message)](message)
+        element = get_element(message)
+        if element in elements_dict:
+            elements_dict[element](message)
+        else:
+            print 'invalid element sent'
 
     def rainbow_handler(self, message, address):
         elements_dict = {
             'position_encoder': self.send_encoder_offset,
             'speed_fader': self.speed_handler
         }
-        elements_dict[get_element(message)](message)
+        element = get_element(message)
+        if element in elements_dict:
+            elements_dict[element](message)
+        else:
+            print 'invalid element sent'
 
     def wheel_handler(self, message, address):
         elements_dict = {
@@ -69,7 +77,11 @@ class UDPReceiverApplication(object):
             'sat_fader': self.saturation_handler,
             'intensity_fader': self.intensity_handler
         }
-        elements_dict[get_element(message)](message)
+        element = get_element(message)
+        if element in elements_dict:
+            elements_dict[element](message)
+        else:
+            print 'invalid element sent'
 
     def fade_handler(self, message, address):
         elements_dict = {
@@ -77,7 +89,11 @@ class UDPReceiverApplication(object):
             'sat_fader': self.saturation_handler,
             'intensity_fader': self.intensity_handler
         }
-        elements_dict[get_element(message)](message)
+        element = get_element(message)
+        if element in elements_dict:
+            elements_dict[element](message)
+        else:
+            print 'invalid element sent'
 
 
     def mode_page_handler(self, message, address):
