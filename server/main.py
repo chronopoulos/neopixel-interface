@@ -9,7 +9,7 @@ from datetime import datetime
 import time
 
 arduino = serial.Serial('/dev/ttyACM0', baudrate=9600)
-time.sleep(1.5) # sleep while wait for handshake to complete
+time.sleep(1.3) # sleep while wait for handshake to complete
 
 last_msg_time = datetime.now()
 uniform_hue = 0
