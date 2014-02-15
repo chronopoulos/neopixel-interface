@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 import time
 
-arduino = serial.Serial('/dev/ttyACM0', baudrate=9600)
+arduino = serial.Serial('/dev/ttyACM0', baudrate=9600) # tty.usbmodem1421 # ttyACM0
 time.sleep(1.3) # sleep while wait for handshake to complete
 
 last_msg_time = datetime.now()
@@ -101,7 +101,9 @@ class UDPReceiverApplication(object):
             'uniform' : 'u',
             'rainbow' : 'r',
             'wheel' : 'w',
-            'fade' : 'f'
+            'fade' : 'f',
+            'walk_rbg' : 'a',
+            'walk_hsv' : 'A'
         }
         mode_string = get_page(message)
         if mode_string in mode_char_lookup:

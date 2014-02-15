@@ -38,7 +38,7 @@ float s=100;
 float v=2;
 
 ///////////////////////////////////
-// rainbow shit
+// Rainbow shit
 
 int autoRainbowOffset = 0;
 int manualRainbowOffset = 0;
@@ -51,9 +51,22 @@ uint32_t tmpColor;
 ///////////////////////////////////
 
 ////////////////////////
-///// wheel and fade
+///// Wheel and Fade
 float wheelHue = 0; // max 360
 float fadeValue = 0; // 0 to 2 pi
+
+///////////////////////
+///// rAndom walk
+int random_red = 0;
+int random_green = 0;
+int random_blue = 0;
+float random_h = 0;
+float random_s = 0;
+float random_v = 0;
+long randomNumber = 0;
+int which_color = 0;
+
+int random_step = 1;
 
 void HSV_to_RGB(float h, float s, float v, byte *r, byte *g, byte *b)
 {
@@ -307,7 +320,73 @@ void calculateFrame(void)
         fadeValue = 0;
       }
       break;
+    case 'a': // random walk
+      switch(which_color){
+        case 0:
+          random_red = colorWalk(random_red, random_step);
+          break;
+        case 1:
+          random_green = colorWalk(random_green, random_step);
+          break;
+        case 2:
+          random_blue = colorWalk(random_blue, random_step);
+          break;
+      }
+      which_color = (which_color + 1) % 3;
+      for (i=0; i<nleds; i++)
+      {
+        rbuff[i] = (byte) random_red;
+        gbuff[i] = (byte) random_green;
+        bbuff[i] = (byte) random_blue;
+      }
+      break;
+    case 'A': // random walk in HSV (JUST HUE RIGHT NOW)
+      delay(100);
+      random_h = random_h + randomLong(random_step);
+      if (random_h >= 360)
+      {
+        random_h = random_h - 360;
+      }
+      else if (random_h < 0)
+      {
+        random_h = random_h * -1;
+      }
+      HSV_to_RGB(random_h, s, v, &r, &g, &b);
+      for (i=0; i<nleds; i++)
+      {
+        rbuff[i] = r;
+        gbuff[i] = g;
+        bbuff[i] = b;
+      }
+      break;
   }
+}
+
+int colorWalk(int color, int step){
+  return normalizeColor(color + randomInt(step));
+}
+
+int randomInt(int step)
+{
+  return int(randomLong(step));
+}
+
+long randomLong(int step)
+{
+  return random(step*2 + 1) - step;
+}
+
+byte normalizeColor(int color)
+{
+  if (color < 0)
+  {
+    color *= -1;
+  }
+  else if (color > 255)
+  {
+    255*2 - color; // wrap around reflection
+  }
+  return (byte) color;
 }
 
 
@@ -325,6 +404,7 @@ void setup()
 {
   Serial.begin(9600);
   leds.begin();  // Call this to start up the LED strip.
+  randomSeed(analogRead(0)); // seed random number generator
 }
 
 
