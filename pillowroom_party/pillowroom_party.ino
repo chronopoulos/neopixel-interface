@@ -57,16 +57,9 @@ float fadeValue = 0; // 0 to 2 pi
 
 ///////////////////////
 ///// rAndom walk
-int random_red = 0;
-int random_green = 0;
-int random_blue = 0;
-float random_h = 0;
-float random_s = 0;
-float random_v = 0;
-long randomNumber = 0;
-int which_color = 0;
-
-int random_step = 1;
+float velocity = 0;
+int acc = 100;
+float max_speed = (float)spd/250;
 
 void HSV_to_RGB(float h, float s, float v, byte *r, byte *g, byte *b)
 {
@@ -210,6 +203,9 @@ void handleOneMessage(void)
         case 's': // speed
           spd = value;
           break;
+        case 'a': // acceleration
+          acc = value;
+          break;
         case 'o': // rainbow offset
           manualRainbowOffset = (int)((float)value*191/250);
           break;
@@ -320,38 +316,38 @@ void calculateFrame(void)
         fadeValue = 0;
       }
       break;
-    case 'a': // random walk
-      switch(which_color){
-        case 0:
-          random_red = colorWalk(random_red, random_step);
-          break;
-        case 1:
-          random_green = colorWalk(random_green, random_step);
-          break;
-        case 2:
-          random_blue = colorWalk(random_blue, random_step);
-          break;
-      }
-      which_color = (which_color + 1) % 3;
-      for (i=0; i<nleds; i++)
+    case 'i': // random inertial hue walk
+      max_speed = (float)spd / 250;
+      Serial.println(max_speed);
+      Serial.println(acc);
+      // in case max_speed just changed
+      if (velocity > max_speed)
       {
-        rbuff[i] = (byte) random_red;
-        gbuff[i] = (byte) random_green;
-        bbuff[i] = (byte) random_blue;
+        velocity = max_speed;
       }
-      break;
-    case 'A': // random walk in HSV (JUST HUE RIGHT NOW)
-      delay(100);
-      random_h = random_h + randomLong(random_step);
-      if (random_h >= 360)
+      else if (velocity < (-1 * max_speed))
       {
-        random_h = random_h - 360;
+        velocity = max_speed * -1;
       }
-      else if (random_h < 0)
+      velocity = velocity + ((float) random(-1 * acc, acc))/10000; // max change of acc/10000
+      if (velocity > max_speed)
       {
-        random_h = random_h * -1;
+        velocity = max_speed * 2 - velocity;
       }
-      HSV_to_RGB(random_h, s, v, &r, &g, &b);
+      else if (velocity < (-1 * max_speed))
+      {
+        velocity = max_speed * -2 - velocity;
+      }
+      h = h + velocity;
+      if (h >= 360)
+      {
+        h = h - 360;
+      }
+      else if (h < 0)
+      {
+        h = 360 + h;
+      }
+      HSV_to_RGB(h, s, v, &r, &g, &b);
       for (i=0; i<nleds; i++)
       {
         rbuff[i] = r;
@@ -360,33 +356,6 @@ void calculateFrame(void)
       }
       break;
   }
-}
-
-int colorWalk(int color, int step){
-  return normalizeColor(color + randomInt(step));
-}
-
-int randomInt(int step)
-{
-  return int(randomLong(step));
-}
-
-long randomLong(int step)
-{
-  return random(step*2 + 1) - step;
-}
-
-byte normalizeColor(int color)
-{
-  if (color < 0)
-  {
-    color *= -1;
-  }
-  else if (color > 255)
-  {
-    255*2 - color; // wrap around reflection
-  }
-  return (byte) color;
 }
 
 

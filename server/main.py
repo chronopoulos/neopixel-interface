@@ -41,6 +41,8 @@ class UDPReceiverApplication(object):
         self.receiver.addCallback("/rainbow/*", self.rainbow_handler)
         self.receiver.addCallback("/wheel/*", self.wheel_handler)
         self.receiver.addCallback("/fade/*", self.fade_handler)
+        self.receiver.addCallback("/inertial_random/*", self.inertial_random_handler)
+
 
         # fallback:
         self.receiver.fallback = self.fallback
@@ -95,6 +97,18 @@ class UDPReceiverApplication(object):
         else:
             print 'invalid element sent'
 
+    def inertial_random_handler(self, message, address):
+        elements_dict = {
+            'speed_fader': self.speed_handler,
+            'acceleration_fader': self.acceleration_handler,
+            'sat_fader': self.saturation_handler,
+            'intensity_fader': self.intensity_handler
+        }
+        element = get_element(message)
+        if element in elements_dict:
+            elements_dict[element](message)
+        else:
+            print 'invalid element sent'
 
     def mode_page_handler(self, message, address):
         mode_char_lookup = {
@@ -102,8 +116,7 @@ class UDPReceiverApplication(object):
             'rainbow' : 'r',
             'wheel' : 'w',
             'fade' : 'f',
-            'walk_rbg' : 'a',
-            'walk_hsv' : 'A'
+            'inertial_random' : 'i'
         }
         mode_string = get_page(message)
         if mode_string in mode_char_lookup:
@@ -147,6 +160,9 @@ class UDPReceiverApplication(object):
 
     def speed_handler(self, message, *args):
         send_simple('s', message)
+
+    def acceleration_handler(self, message, *args):
+        send_simple('a', message)
 
     def mode_handler(self, message, address):
         if (message.getValues()[0]==1): # only do stuff on button push, not button release
