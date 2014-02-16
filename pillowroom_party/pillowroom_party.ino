@@ -363,8 +363,6 @@ void calculateFrame(void)
       break;
     case 'i': // random inertial hue walk
       max_speed = (float)spd / 250;
-      Serial.println(max_speed);
-      Serial.println(acc);
       // in case max_speed just changed
       if (velocity > max_speed)
       {
