@@ -32,6 +32,8 @@ byte r;
 byte g;
 byte b;
 
+int rgb[3];
+
 
 float h=352; // crazy pink
 float s=100;
@@ -129,7 +131,7 @@ void HSV_to_RGB(float h, float s, float v, byte *r, byte *g, byte *b)
 // the vector rgb will contain red, green, and blue
 // calculated values.
 
-void HSI2RBG(float H, float S, float I, int* rgb) {
+void HSI_to_RGB(float H, float S, float I, int* rgb) {
   int r, g, b;
   H = fmod(H,360); // cycle H around to 0-360 degrees
   H = 3.14159*H/(float)180; // Convert to radians.
@@ -305,16 +307,20 @@ void calculateFrame(void)
       totalOffset = autoRainbowOffset+manualRainbowOffset;
       for (i=0; i<nleds; i++)
       {
-//        HSV_to_RGB((rainbowScale*i+autoRainbowOffset+manualRainbowOffset)%360, 100.0, 100.0, &r, &g, &b);
-        tmpColor = rainbowColor((rainbowScale*i+(totalOffset))%191);
-        rbuff[i] = tmpColor >> 16;
-        gbuff[i] = tmpColor >> 8;
-        bbuff[i] = tmpColor;
+        HSI_to_RGB((rainbowScale*i+autoRainbowOffset+manualRainbowOffset)%360, 1.0, 1.0, rgb);
+        rbuff[i] = (byte) rgb[0];
+        gbuff[i] = (byte) rgb[1];
+        bbuff[i] = (byte) rgb[2];
+        // HSV_to_RGB((rainbowScale*i+autoRainbowOffset+manualRainbowOffset)%360, 100.0, 100.0, &r, &g, &b);
+        // tmpColor = rainbowColor((rainbowScale*i+(totalOffset))%191);
+        // rbuff[i] = tmpColor >> 16;
+        // gbuff[i] = tmpColor >> 8;
+        // bbuff[i] = tmpColor;
       }
       rainbowShiftCounter += spd; // counter increments according to speed
       if (rainbowShiftCounter > 249) // only auto-shift the rainbow when counter is high enough
       {
-        autoRainbowOffset = (autoRainbowOffset + 1)%191;
+        autoRainbowOffset = (autoRainbowOffset + 1)%360;
         rainbowShiftCounter = rainbowShiftCounter % 250;
       }
       break;
