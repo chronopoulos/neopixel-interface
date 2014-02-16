@@ -37,7 +37,7 @@ int rgb[3];
 
 float h=352; // crazy pink
 float s=100;
-float v=2;
+float v=67;
 
 ///////////////////////////////////
 // Rainbow shit
@@ -360,6 +360,7 @@ void calculateFrame(void)
       {
         fadeValue = 0;
       }
+
       break;
     case 'i': // random inertial hue walk
       max_speed = (float)spd / 250;
@@ -396,6 +397,23 @@ void calculateFrame(void)
         rbuff[i] = r;
         gbuff[i] = g;
         bbuff[i] = b;
+      }
+      break;
+    case 'c': // camera flashes
+      for (i=0; i<nleds; i++)
+      {
+        if (random(10000) >= 9990)
+        {
+          rbuff[i] = (byte) 255;
+          gbuff[i] = (byte) 255;
+          bbuff[i] = (byte) 255;
+        }
+        else
+        {
+          rbuff[i] = (byte) 0;
+          gbuff[i] = (byte) 0;
+          bbuff[i] = (byte) 0;
+        }
       }
       break;
   }
