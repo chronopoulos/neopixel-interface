@@ -31,6 +31,9 @@ byte spd = 20;
 byte r;
 byte g;
 byte b;
+byte r2;
+byte g2;
+byte b2;
 
 int rgb[3];
 
@@ -305,7 +308,7 @@ void calculateFrame(void)
       break;
     case 'r': // automatic rainbow
       totalOffset = autoRainbowOffset+manualRainbowOffset;
-      for (i=0; i<nleds; i++)
+      for (i=0; i<nleds/2; i++)
       {
         HSI_to_RGB((rainbowScale*i+autoRainbowOffset+manualRainbowOffset)%360, 1.0, 1.0, rgb);
         rbuff[i] = (byte) rgb[0];
@@ -316,6 +319,13 @@ void calculateFrame(void)
         // rbuff[i] = tmpColor >> 16;
         // gbuff[i] = tmpColor >> 8;
         // bbuff[i] = tmpColor;
+      }
+      for (i=nleds/2; i<nleds; i++)
+      {
+        HSV_to_RGB((rainbowScale*i+autoRainbowOffset+manualRainbowOffset)%360, 100.0, 100.0, &r, &g, &b);
+        rbuff[i] = r;
+        gbuff[i] = g;
+        bbuff[i] = b;
       }
       rainbowShiftCounter += spd; // counter increments according to speed
       if (rainbowShiftCounter > 249) // only auto-shift the rainbow when counter is high enough
@@ -334,12 +344,22 @@ void calculateFrame(void)
       }
       break;
     case 'w': // wheel
-      HSV_to_RGB(wheelHue, s, v, &r, &g, &b);
-      for (i=0; i<nleds; i++)
+      HSV_to_RGB(wheelHue, 100, 100, &r, &g, &b);
+      HSI_to_RGB(wheelHue, 1.0, 1.0, rgb);
+      r2 = (byte) rgb[0];
+      g2 = (byte) rgb[1];
+      b2 = (byte) rgb[2];
+      for (i=0; i<nleds/2; i++)
       {
         rbuff[i] = r;
         gbuff[i] = g;
         bbuff[i] = b;
+      }
+      for (i=nleds/2; i<nleds; i++)
+      {
+        rbuff[i] = r2;
+        gbuff[i] = g2;
+        bbuff[i] = b2;
       }
       wheelHue = wheelHue + (float)spd/250;
       if (wheelHue >= 360)
